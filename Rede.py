@@ -92,11 +92,11 @@ acuracias = [0.949, 0.953]
 # Lista de treinamento e teste
 quebras = ['60-40', '70-30']
 
-# Plotará a precisão do desempenho de cada modelo em relação à divisão do conjunto de treinamento e teste
+# Irá fazer um gráfico com a precisão do desempenho de cada modelo em relação à divisão do conjunto de treinamento e teste
 plt.plot(quebras, acuracias)
 plt.xlabel('Divisão do conjunto de treinamento e teste')
 plt.ylabel('Precisão de desempenho')
-plt.title('Precisão de desempenho de modelos florestais aleatórios com diferentes divisões de conjuntos de treinamento e teste')
+plt.title('Precisão de desempenho de modelos de Random Forest com diferentes divisões de conjuntos de treinamento e teste')
 plt.show()
 
 
