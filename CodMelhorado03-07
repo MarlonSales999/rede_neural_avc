@@ -2,8 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.preprocessing import LabelEncoder
-from sklearn.preprocessing import StandardScaler, Normalizer
+from sklearn.preprocessing import LabelEncoder, StandardScaler, Normalizer
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
@@ -117,3 +116,35 @@ ax.legend()
 # Mostrar gráfico
 plt.grid(True)
 plt.show()
+
+# Obter a matriz de importância dos recursos
+importancias = modelo.feature_importances_
+print("Importâncias dos recursos: ", importancias)
+
+# Combinar importâncias com os nomes dos recursos
+nomes_dos_recursos = dados.drop(["avc"], axis=1).columns
+importancias_df = pd.DataFrame({'Recurso': nomes_dos_recursos, 'Importância': importancias})
+importancias_df = importancias_df.sort_values(by='Importância', ascending=False)
+
+print(importancias_df)
+
+# Gráfico das importâncias dos recursos
+plt.figure(figsize=(12, 8))
+sns.barplot(x='Importância', y='Recurso', data=importancias_df)
+plt.title('Importância dos Recursos')
+plt.show()
+
+# Usar o modelo para fazer previsões com novos inputs
+# Verifique o número de características
+print("Número de características esperadas: ", x_treinamento.shape[1])
+
+# Exemplo de novos inputs (9 características)
+novos_inputs = np.array([[0.5, 0.1, 0.3, 0.2, 0.1, 0.5, 0.2, 0.3, 0.6]])  # Ajustado para 9 características
+
+# Aplicar a mesma padronização e normalização
+novos_inputs = scaler.transform(novos_inputs)
+novos_inputs = Normalizer().transform(novos_inputs)
+
+# Fazer previsões com novos inputs
+previsoes = modelo.predict(novos_inputs)
+print("Previsões para novos inputs: ", previsoes)
