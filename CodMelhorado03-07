@@ -1,0 +1,119 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import StandardScaler, Normalizer
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+
+# Carregar os dados
+dados = pd.read_csv('derrame_cerebral.csv')
+
+# Exibir informações gerais sobre o DataFrame
+print("\n")
+dados.info()
+
+# Remover a coluna "tipo_residencia"
+dados = dados.drop(["tipo_residencia"], axis=1)
+
+# Remover duplicados, se houver
+dados = dados.drop_duplicates()
+
+# Transformar dados categóricos em números
+enc = LabelEncoder()
+for i in dados.columns:
+    if dados[i].dtype == "object":
+        dados[i] = enc.fit_transform(dados[i])
+
+# Exibir informações gerais após transformação
+dados.info()
+
+# Mapa de calor para analisar correlações
+plt.figure(figsize=(12, 10))
+sns.heatmap(dados.corr(), annot=True, cmap='coolwarm')
+plt.show()
+
+# Separar a variável alvo e os dados de entrada
+y = dados["avc"]
+x = dados.drop(["avc"], axis=1)
+
+# Padronização e normalização dos dados
+scaler = StandardScaler()
+x = scaler.fit_transform(x)
+x = Normalizer().fit_transform(x)
+
+# Divisão dos dados em treinamento e teste (60-40)
+x_treinamento, x_teste, y_treinamento, y_teste = train_test_split(x, y, test_size=0.40, random_state=0)
+
+# Treinamento do modelo RandomForest
+modelo = RandomForestClassifier(random_state=0)
+modelo.fit(x_treinamento, y_treinamento)
+y_predicao = modelo.predict(x_teste)
+
+# Avaliação do modelo
+print("40% teste e 60% treinamento")
+print("Precisões Corretas: %.3f" % accuracy_score(y_teste, y_predicao))
+print("Precisões Positivas: %.3f" % precision_score(y_teste, y_predicao, average='macro'))
+print("Recall: %.3f" % recall_score(y_teste, y_predicao, average='macro'))
+print("F1: %.3f" % f1_score(y_teste, y_predicao, average='macro'))
+print("\n")
+
+# Divisão dos dados em treinamento e teste (70-30)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=0)
+
+# Treinamento do modelo RandomForest
+model = RandomForestClassifier(random_state=0)
+model.fit(x_train, y_train)
+y_pred = model.predict(x_test)
+
+# Avaliação do modelo
+print("30% teste e 70% treinamento")
+print("Precisões Corretas: %.3f" % accuracy_score(y_test, y_pred))
+print("Precisões Positivas: %.3f" % precision_score(y_test, y_pred, average='macro'))
+print("Recall: %.3f" % recall_score(y_test, y_pred, average='macro'))
+print("F1: %.3f" % f1_score(y_test, y_pred, average='macro'))
+print("\n")
+
+# Lista das acurácias
+acuracias = [accuracy_score(y_teste, y_predicao), accuracy_score(y_test, y_pred)]
+
+# Lista de divisões treinamento e teste
+quebras = ['60-40', '70-30']
+
+# Gráfico com a precisão de desempenho
+plt.figure(figsize=(10, 6))
+plt.plot(quebras, acuracias, marker='o')
+plt.xlabel('Divisão do conjunto de treinamento e teste')
+plt.ylabel('Precisão de desempenho')
+plt.title('Precisão de desempenho de modelos de Random Forest com diferentes divisões de conjuntos de treinamento e teste')
+plt.grid(True)
+plt.show()
+
+# Pontuações de precisão, recall e F1
+pontuacao_precisao = [precision_score(y_teste, y_predicao, average='macro'), precision_score(y_test, y_pred, average='macro')]
+pontuacao_recall = [recall_score(y_teste, y_predicao, average='macro'), recall_score(y_test, y_pred, average='macro')]
+pontuacao_f1 = [f1_score(y_teste, y_predicao, average='macro'), f1_score(y_test, y_pred, average='macro')]
+cores = ['blue', 'red']
+labels = ['60-40 split', '70-30 split']
+
+# Gráfico para precisão, recall e F1
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.set_xticks([0, 1])
+ax.set_xticklabels(labels)
+
+# Plota as pontuações
+ax.plot(pontuacao_precisao, label='Precisão', color=cores[0])
+ax.plot(pontuacao_recall, label='Recall', color=cores[1])
+ax.plot(pontuacao_f1, label='F1', color='green')
+
+# Título e legendas
+ax.set_title('Precisão, recall e F1 de modelos de Random Forest com diferentes divisões de conjuntos de treinamento e teste')
+ax.set_xlabel('Divisão de treinamento-teste')
+ax.set_ylabel('Pontuação')
+ax.legend()
+
+# Mostrar gráfico
+plt.grid(True)
+plt.show()
