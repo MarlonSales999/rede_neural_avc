@@ -1,0 +1,4 @@
+﻿"genero","idade","hipertensao","doenca_cardiaca","casado","tipo_trabalho","tipo_residencia","nivel_glicose","imc","condicao_fumante"
+"Masculino","93","1","1","Sim","Privado","Urbano","228.69","36.6","fuma"
+"Feminino","74","1","0","Sim","Privado","Urbano","70.28","21.8","nunca fumou"
+"Feminino","47","0","0","Sim","Privado","Urbano","103.26","25.4","Desconhecido"
