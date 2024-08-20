@@ -1,0 +1,53 @@
+from flask import Flask, request, jsonify, make_response
+import pickle
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+
+app = Flask(__name__)
+
+# Carregar o modelo
+filename = 'modelo_final3.pkl'
+with open(filename, 'rb') as file:  
+    modelo_carregado = pickle.load(file)
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    # Verificar se o tipo de conteúdo é JSON
+    if request.content_type != 'application/json':
+        return make_response(jsonify({'error': 'Content-Type must be application/json'}), 415)
+    
+    # Obter os dados do pedido
+    try:
+        dados_json = request.json
+        dados = pd.DataFrame(dados_json)
+    except Exception as e:
+        return make_response(jsonify({'error': 'Invalid JSON data', 'message': str(e)}), 400)
+    
+    # Verificar se há dados no JSON
+    if dados.empty:
+        return make_response(jsonify({'error': 'Empty JSON data'}), 400)
+
+    # Remover a coluna 'tipo_residencia' que não é necessária para o modelo
+    if 'tipo_residencia' in dados.columns:
+        dados = dados.drop(["tipo_residencia"], axis=1)
+
+    # Transformação dos dados categóricos em números
+    enc = LabelEncoder()
+    for i in dados.columns:
+        if dados[i].dtype == "object":
+            dados[i] = enc.fit_transform(dados[i])
+
+    # Converter os dados de previsão para um array numpy
+    dados_array = dados.values
+
+    # Fazer a previsão
+    try:
+        predicoes = modelo_carregado.predict(dados_array)
+    except Exception as e:
+        return make_response(jsonify({'error': 'Prediction error', 'message': str(e)}), 500)
+
+    # Retornar as previsões como JSON
+    return jsonify(predicoes.tolist())
+
+if __name__ == '__main__':
+    app.run(debug=True)
